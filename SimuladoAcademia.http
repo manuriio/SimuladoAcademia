@@ -1,0 +1,6 @@
+@SimuladoAcademia_HostAddress = http://localhost:5118
+
+GET {{SimuladoAcademia_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
