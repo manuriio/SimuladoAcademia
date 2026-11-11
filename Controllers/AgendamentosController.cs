@@ -23,21 +23,61 @@ namespace SimuladoAcademia.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AgendamentoDto>>> GetAgendamentos()
+        public async Task<IActionResult> GetAgendamentos()
         {
-            return await _context.Agendamentos.Select(a => new AgendamentoDto
-            {
-                id = a.id,
-                DataHora = a.DataHora,
-                PersonalId = a.PersonalId,
-                AlunoId = a.AlunoId
-            }).ToListAsync();
-        }
+            var lista = await _context.Agendamentos
+                .AsNoTracking()
+                .Include(a => a.Personal)
+                .Include(a => a.Aluno)
+                .OrderBy(a => a.DataHora)
+                .ToListAsync();
 
+
+            var resposta = lista.Select(a => new
+            {
+                a.id,
+                a.DataHora,
+                a.Servico,
+                Personal = new
+                {
+                    a.Personal.Id,
+                    a.Personal.Nome,
+                    a.Personal.Email
+                },
+                Aluno = new
+                {
+                    a.Aluno.Id,
+                    a.Aluno.Nome,
+                    a.Aluno.Email,
+                    a.Aluno.Telefone
+                }
+            });
+
+
+            return Ok(resposta);
+        }
 
         [HttpPost]
         public async Task<ActionResult<AgendamentoDto>> CreateAgendamento(AgendamentoCreateDto agendamentoCreateDto)
         {
+            // Verifica se o aluno existe
+            var aluno = await _context.Alunos
+                .FindAsync(agendamentoCreateDto.AlunoId);
+
+            if (aluno == null)
+            {
+                return BadRequest("Aluno não encontrado.");
+            }
+
+            // Verifica se o personal existe
+            var personal = await _context.Personal
+                .FindAsync(agendamentoCreateDto.PersonalId);
+
+            if (personal == null)
+            {
+                return BadRequest("Personal não encontrado.");
+            }
+
             var agendamento = new Agendamento
             {
                 DataHora = agendamentoCreateDto.DataHora,
@@ -45,8 +85,11 @@ namespace SimuladoAcademia.Controllers
                 Servico = agendamentoCreateDto.Servico,
                 AlunoId = agendamentoCreateDto.AlunoId
             };
+
             _context.Agendamentos.Add(agendamento);
+
             await _context.SaveChangesAsync();
+
             var agendamentoDto = new AgendamentoDto
             {
                 id = agendamento.id,
@@ -54,9 +97,9 @@ namespace SimuladoAcademia.Controllers
                 PersonalId = agendamento.PersonalId,
                 AlunoId = agendamento.AlunoId
             };
-            return CreatedAtAction(nameof(GetAgendamentos), new { id = agendamento.id }, agendamentoDto);
-        }
 
+            return Ok(agendamentoDto);
+        }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAgendamento(int id, AgentamentoUpdateDto agendamentoUpdateDto)

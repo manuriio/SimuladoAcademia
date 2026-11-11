@@ -1,4 +1,6 @@
-﻿namespace SimuladoAcademia.Models
+﻿using System.Text.Json.Serialization;
+
+namespace SimuladoAcademia.Models
 {
     public class Agendamento
     {
@@ -6,6 +8,7 @@
         public DateTime? DataHora { get; set; }
         public string? Servico { get; set; }
         public int AlunoId { get; set; }
+
         public Aluno? Aluno { get; set; }
 
         public int PersonalId { get; set; }

@@ -24,6 +24,7 @@ namespace SimuladoAcademia.Controllers
         {
             return await _context.Alunos.Select(a => new AlunoDto
             {
+                Id = a.Id,
                 Nome = a.Nome,
                 Email = a.Email,
                 Telefone = a.Telefone,

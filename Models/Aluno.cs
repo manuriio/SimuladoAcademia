@@ -9,6 +9,6 @@
 
         public int PersonalId { get; set; }
         public Personal? Personal { get; set; }
-        public ICollection<Agendamento> Agendamentos { get; set; }
+        public ICollection<Agendamento>? Agendamentos { get; set; }
     }
 }
